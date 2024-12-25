@@ -1,0 +1,12 @@
+.dark {
+  display: light-dark(block, none);
+}
+
+.light {
+  display: light-dark(none, block);
+}
+
+.icon-size-md {
+  width: rem(16);
+  height: rem(16);
+}
