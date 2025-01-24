@@ -3,7 +3,7 @@ from typing import cast
 
 from qdrant_client import AsyncQdrantClient
 
-from app.domain.value_object import Embedding, Emoji
+from app.domain.value_object import Emoji, F32Array
 
 
 class EmojiRepository:
@@ -11,14 +11,11 @@ class EmojiRepository:
         self.client = client
         self.collection_name = collection_name
 
-    async def autocomplete(self, term: str) -> Sequence[str]:
-        return []
-
     async def semantic_search(
         self,
-        embedding: Embedding,
+        embedding: F32Array,
         *,
-        limit: int = 10,
+        limit: int = 32,
         score_threshold: float | None = None,
     ) -> Sequence[Emoji]:
         return [

@@ -4,6 +4,7 @@ from typing import Annotated, TypedDict, cast
 import typer
 from datasets import (  # pyright: ignore [reportMissingTypeStubs]
     Dataset,
+    disable_progress_bars,
     load_from_disk,  # pyright: ignore [reportUnknownVariableType]
 )
 from qdrant_client import QdrantClient
@@ -17,6 +18,7 @@ class EmojiDatasetBatch(TypedDict):
     emoji: list[str]
     shortcode: list[str]
     keywords: list[list[str]]
+    description: str
     embedding: list[list[float]]
 
 
@@ -24,7 +26,7 @@ def _create_collection(client: QdrantClient, collection_name: str) -> None:
     try:
         client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=384, distance=Distance.DOT),
         )
     except ValueError as exc:
         if "Collection already exists" not in str(exc):
@@ -50,11 +52,17 @@ def _upload_dataset(
                 ids=list(range(begin, end)),
                 vectors=batch["embedding"],
                 payloads=[
-                    {"emoji": emoji, "shortcode": shortcode, "keywords": keywords}
-                    for emoji, shortcode, keywords in zip(
+                    {
+                        "emoji": emoji,
+                        "shortcode": shortcode,
+                        "keywords": keywords,
+                        "description": description,
+                    }
+                    for emoji, shortcode, keywords, description in zip(
                         batch["emoji"],
                         batch["shortcode"],
                         batch["keywords"],
+                        batch["description"],
                         strict=True,
                     )
                 ],
@@ -96,4 +104,5 @@ def main(
 
 
 if __name__ == "__main__":
+    disable_progress_bars()
     typer.run(main)

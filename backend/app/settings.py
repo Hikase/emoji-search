@@ -1,4 +1,5 @@
 from functools import cache
+from pathlib import Path
 
 from dotenv import find_dotenv
 from pydantic import HttpUrl, Secret, SecretStr
@@ -19,6 +20,8 @@ class _AppSettings(BaseSettings):
     qdrant_url: Secret[HttpUrl]
     qdrant_api_key: SecretStr | None = None
     collection_name: str = "emojis"
+
+    model_path: Path
 
 @cache
 def get_app_settings() -> _AppSettings:

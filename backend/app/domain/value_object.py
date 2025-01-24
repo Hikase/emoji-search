@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 from pydantic.dataclasses import dataclass
 
-__all__ = ["Embedding", "Emoji"]
+__all__ = ["Emoji", "F32Array"]
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class Emoji:
@@ -13,4 +13,4 @@ class Emoji:
     keywords: Sequence[str]
 
 
-type Embedding = npt.NDArray[np.float32]
+type F32Array = npt.NDArray[np.float32]

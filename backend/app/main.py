@@ -1,22 +1,9 @@
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api_v1
-from app.feature_extractor import get_feature_extractor
-from app.vector_db.client import get_qdrant_client
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    get_feature_extractor()
-
-    yield
-
-    await get_qdrant_client().close()
-
+from app.lifespan import lifespan
 
 origins = [
     "*",
@@ -35,4 +22,4 @@ app.add_middleware(
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    return {"message": "Hello Bigger Applications!"}
+    return {"message": "Emoji Search 🤔 API"}
