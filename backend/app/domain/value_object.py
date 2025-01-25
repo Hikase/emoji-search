@@ -6,6 +6,7 @@ from pydantic.dataclasses import dataclass
 
 __all__ = ["Emoji", "F32Array"]
 
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class Emoji:
     emoji: str

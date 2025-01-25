@@ -1,10 +1,11 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: check-yaml
       - id: check-json
+        exclude: ^frontend/
       - id: check-toml
       - id: check-added-large-files
   - repo: local
@@ -27,4 +28,3 @@ repos:
         language: system
         types_or: [python, pyi]
         require_serial: true
-

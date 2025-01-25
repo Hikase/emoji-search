@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,7 +8,7 @@ origins = [
     "*",
 ]
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title="Emoji Search", lifespan=lifespan)
 app.include_router(api_v1)
 app.add_middleware(
     CORSMiddleware,

@@ -2,7 +2,7 @@ import json
 from collections.abc import Sequence
 from functools import cache
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict, cast
+from typing import TYPE_CHECKING, Self, TypedDict, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -15,7 +15,7 @@ from app.settings import get_app_settings
 __all__ = [
     "FeatureExtractor",
     "get_feature_extractor",
-    "get_tokenizer",
+    "load_tokenizer",
     "mean_pooling",
     "normalize",
 ]
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
         special: bool
 
 
-def _get_tokenizer(model_dir: str | Path, /) -> Tokenizer:
+def load_tokenizer(model_dir: str | Path, /) -> Tokenizer:
     model_dir = Path(model_dir)
 
     try:
@@ -84,11 +84,6 @@ def _get_tokenizer(model_dir: str | Path, /) -> Tokenizer:
     return tokenizer
 
 
-@cache
-def get_tokenizer() -> Tokenizer:
-    return _get_tokenizer(get_app_settings().model_path)
-
-
 def mean_pooling(
     *, embeddings: F32Array, attention_mask: npt.NDArray[np.int64]
 ) -> F32Array:
@@ -108,13 +103,13 @@ def normalize(
 
 
 class FeatureExtractor:
-    def __init__(self, model_path: str | Path) -> None:
-        self._tokenizer = _get_tokenizer(model_path)
-        self._inference_session = InferenceSession(Path(model_path) / "model.onnx")
+    def __init__(self, model: InferenceSession, tokenizer: Tokenizer) -> None:
+        self._tokenizer = tokenizer
+        self._model = model
 
         output_names: Sequence[str] = [
             node.name  # pyright: ignore [reportUnknownMemberType]
-            for node in self._inference_session.get_outputs()  # pyright: ignore [reportUnknownVariableType]
+            for node in self._model.get_outputs()  # pyright: ignore [reportUnknownVariableType]
         ]
         if "sentence_embedding" in output_names:
             self._output_name = "sentence_embedding"
@@ -123,8 +118,40 @@ class FeatureExtractor:
 
         self._has_token_type_ids = "token_type_ids" in [
             node.name  # pyright: ignore [reportUnknownMemberType]
-            for node in self._inference_session.get_inputs()  # pyright: ignore [reportUnknownVariableType]
+            for node in self._model.get_inputs()  # pyright: ignore [reportUnknownVariableType]
         ]
+
+    @classmethod
+    def load(cls, model_path: str | Path, *, file_name: str | None = None) -> Self:
+        if not isinstance(model_path, Path):
+            model_path = Path(model_path)
+
+        if model_path.is_dir():
+            if file_name is None:
+                onnx_files = list(model_path.glob("*.onnx"))
+
+                if len(onnx_files) == 0:
+                    msg = f"Could not find any ONNX model file in {model_path}"
+                    raise FileNotFoundError(msg)
+                if len(onnx_files) > 1:
+                    msg = (
+                        f"Too many ONNX model files were found in {model_path}, "
+                        "specify which one to load by using the file_name argument."
+                    )
+                    raise ValueError(msg)
+
+                file_name = onnx_files[0].name
+        elif model_path.is_file():
+            file_name = model_path.name
+            model_path = model_path.parent
+        else:
+            msg = f"Invalid model path: {model_path}"
+            raise ValueError(msg)
+
+        model = InferenceSession(model_path / file_name)
+        tokenizer = load_tokenizer(model_path)
+
+        return cls(model, tokenizer)
 
     def embed(self, docs: str | Sequence[str]) -> F32Array:
         if isinstance(docs, str):
@@ -155,7 +182,7 @@ class FeatureExtractor:
             )
 
         result: F32Array = np.array(
-            self._inference_session.run(  # pyright: ignore [reportUnknownMemberType, reportUnknownArgumentType]
+            self._model.run(  # pyright: ignore [reportUnknownMemberType, reportUnknownArgumentType]
                 output_names=[self._output_name],
                 input_feed=input_feed,
             )[0]
@@ -169,4 +196,4 @@ class FeatureExtractor:
 
 @cache
 def get_feature_extractor() -> FeatureExtractor:
-    return FeatureExtractor(get_app_settings().model_path)
+    return FeatureExtractor.load(get_app_settings().model_path)

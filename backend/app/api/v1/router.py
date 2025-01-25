@@ -14,6 +14,7 @@ __all__ = ["api_v1"]
 
 api_v1 = APIRouter(prefix="/v1", tags=["v1"])
 
+
 @api_v1.get(
     path="/search",
     status_code=status.HTTP_200_OK,

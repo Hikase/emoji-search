@@ -19,9 +19,10 @@ class _AppSettings(BaseSettings):
 
     qdrant_url: Secret[HttpUrl]
     qdrant_api_key: SecretStr | None = None
-    collection_name: str = "emojis"
+    collection_name: str = "emojis-2"
 
     model_path: Path
+
 
 @cache
 def get_app_settings() -> _AppSettings:
