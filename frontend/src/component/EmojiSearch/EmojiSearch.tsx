@@ -1,3 +1,4 @@
+import { UUID } from 'crypto';
 import { useQuery } from '@siberiacancode/reactuse';
 
 import { Box, CloseButton, Text, TextInput } from '@mantine/core';
@@ -11,8 +12,8 @@ interface Emoji {
 }
 
 interface SearchResult {
-  type: string;
   items: Emoji[];
+  search_uid: UUID;
 }
 
 const getSearchResult = (query: string) =>
@@ -53,7 +54,7 @@ export const EmojiSearch = () => {
         {getSearchQuery.data !== undefined &&
           (getSearchQuery.isSuccess ? (
             <EmojiList
-              itemsData={getSearchQuery.data.items.map((item) => ({
+              items={getSearchQuery.data.items.map((item) => ({
                 emoji: item.emoji,
                 emojiName: item.shortcode.replaceAll(':', '').replaceAll('-', ' '),
               }))}

@@ -11,6 +11,10 @@ export default defineConfig({
         find: '@emoji-search',
         replacement: path.resolve('src'),
       },
+      {
+        find: '@tabler/icons-react',
+        replacement: '@tabler/icons-react/dist/esm/icons/index.mjs',
+      },
     ],
   },
   build: {

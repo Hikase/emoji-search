@@ -22,7 +22,7 @@ export const ColorThemeControl = () => {
       <ActionIcon
         onClick={() => setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light')}
         aria-label="Switch theme"
-        size="md"
+        size="lg"
       >
         <VisuallyHidden>Switch theme</VisuallyHidden>
         <IconSun className={cx(classes.light, classes['icon-size-md'])} stroke={2} />

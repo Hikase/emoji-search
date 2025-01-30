@@ -1,16 +1,39 @@
-import { Divider } from '@mantine/core';
-
-import { EmojiListItem, EmojiListItemProps } from './EmojiListItem';
+import { CopyButton, List, Title, Tooltip } from '@mantine/core';
 
 interface EmojiListProps {
-  itemsData: EmojiListItemProps[];
+  items: {
+    emoji: string;
+    emojiName: string;
+  }[];
 }
 
-export const EmojiList = ({ itemsData }: EmojiListProps) => {
-  return itemsData.map((item, index) => (
-    <>
-      <EmojiListItem key={item.emoji} emoji={item.emoji} emojiName={item.emojiName} />
-      {index !== itemsData.length - 1 && <Divider />}
-    </>
-  ));
+export const EmojiList = ({ items }: EmojiListProps) => {
+  return (
+    <List center spacing="xs" size="md">
+      {items.map((item) => (
+        <List.Item
+          key={item.emoji}
+          icon={
+            <CopyButton value={item.emoji} timeout={1000}>
+              {({ copied, copy }) => (
+                <Tooltip
+                  label={copied ? 'Copied!' : 'Copy'}
+                  withArrow
+                  position="left"
+                  color={copied ? 'teal' : undefined}
+                >
+                  <Title order={1} component="p" onClick={copy} style={{ cursor: 'pointer' }}>
+                    {item.emoji}
+                  </Title>
+                </Tooltip>
+              )}
+            </CopyButton>
+          }
+          tt="capitalize"
+        >
+          {item.emojiName}
+        </List.Item>
+      ))}
+    </List>
+  );
 };
