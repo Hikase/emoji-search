@@ -5,6 +5,8 @@ from dotenv import find_dotenv
 from pydantic import HttpUrl, Secret, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.domain.value_object import SqliteDsn
+
 __all__ = []
 
 
@@ -19,9 +21,11 @@ class _AppSettings(BaseSettings):
 
     qdrant_url: Secret[HttpUrl]
     qdrant_api_key: SecretStr | None = None
-    collection_name: str = "emojis-2"
+    collection_name: str = "emojis"
 
     model_path: Path
+
+    sqlite_dsn: SqliteDsn = SqliteDsn("sqlite+aiosqlite:///emoji_search.db")
 
 
 @cache

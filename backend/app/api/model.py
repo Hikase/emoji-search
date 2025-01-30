@@ -2,14 +2,19 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel
 
-__all__ = ["ErrorModel", "ListModel"]
+from app.domain.exception import ErrorDetail
+
+__all__ = ["ErrorModel", "ListModel", "MessageModel"]
 
 
 class ErrorModel(BaseModel):
     title: str
-    detail: str | None = None
+    errors: Sequence[ErrorDetail]
 
 
 class ListModel[T: BaseModel | str | int](BaseModel):
-    type: str = "list"
     items: Sequence[T]
+
+
+class MessageModel(BaseModel):
+    message: str

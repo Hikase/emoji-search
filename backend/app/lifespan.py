@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.feature_extractor import get_feature_extractor
-from app.vector_db.client import get_qdrant_client
+from app.infrastructure.feature_extractor import get_feature_extractor
+from app.infrastructure.vector_db import get_qdrant_client
 
 __all__ = ["lifespan"]
 

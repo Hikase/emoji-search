@@ -2,7 +2,7 @@ import json
 from collections.abc import Sequence
 from functools import cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Self, TypedDict, cast
+from typing import TYPE_CHECKING, Self, TypedDict, cast, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -30,6 +30,12 @@ if TYPE_CHECKING:
         rstrip: bool
         normalized: bool
         special: bool
+
+
+class EncodeResult(TypedDict):
+    input_ids: npt.NDArray[np.int64]
+    attention_mask: npt.NDArray[np.int64]
+    token_type_ids: npt.NDArray[np.int64] | None
 
 
 def load_tokenizer(model_dir: str | Path, /) -> Tokenizer:
@@ -153,7 +159,7 @@ class FeatureExtractor:
 
         return cls(model, tokenizer)
 
-    def embed(self, docs: str | Sequence[str]) -> F32Array:
+    def encode(self, docs: str | Sequence[str]) -> EncodeResult:
         if isinstance(docs, str):
             docs = [docs]
 
@@ -170,16 +176,31 @@ class FeatureExtractor:
             dtype=np.int64,
         )
 
-        input_feed = {
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
-        }
+        input_feed = EncodeResult(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=None,
+        )
 
         if self._has_token_type_ids:
             input_feed["token_type_ids"] = npt.NDArray[np.int64] = np.array(
                 [encoding.type_ids for encoding in encodings],  # pyright: ignore [reportUnknownMemberType]
                 dtype=np.int64,
             )
+
+        return input_feed
+
+    @overload
+    def embed(self, docs: str, /) -> F32Array: ...
+
+    @overload
+    def embed(self, docs: Sequence[str], /) -> F32Array: ...
+
+    @overload
+    def embed(self, input_feed: EncodeResult, /) -> F32Array: ...
+
+    def embed(self, input_: str | Sequence[str] | EncodeResult, /) -> F32Array:
+        input_feed = input_ if isinstance(input_, dict) else self.encode(input_)
 
         result: F32Array = np.array(
             self._model.run(  # pyright: ignore [reportUnknownMemberType, reportUnknownArgumentType]
@@ -188,10 +209,14 @@ class FeatureExtractor:
             )[0]
         )
 
-        if self._output_name == "sentence_embedding":
-            return result
+        if self._output_name != "sentence_embedding":
+            result = normalize(
+                mean_pooling(
+                    embeddings=result, attention_mask=input_feed["attention_mask"]
+                )
+            )
 
-        return normalize(mean_pooling(embeddings=result, attention_mask=attention_mask))
+        return result
 
 
 @cache
