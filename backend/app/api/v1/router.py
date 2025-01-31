@@ -51,7 +51,7 @@ async def search_emoji(
     response_model=SearchResultModel,
 )
 async def autocomplete_shortcode(
-    shortcode: Annotated[str, Query(alias="q", regex=r"^[\-a-z\d]+$", max_length=127)],
+    shortcode: Annotated[str, Query(alias="q", max_length=127)],
     search_gateway: SearchGatewayDep,
 ) -> JSONResponse:
     return get_json_response(
@@ -59,7 +59,7 @@ async def autocomplete_shortcode(
             items=[
                 create_emoji_model(emoji)
                 for emoji in await uc_autocomplete(
-                    shortcode=shortcode, search_gateway=search_gateway
+                    shortcode=(shortcode or ":").lower(), search_gateway=search_gateway
                 )
             ]
         )
