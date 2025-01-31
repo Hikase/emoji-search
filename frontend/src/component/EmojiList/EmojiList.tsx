@@ -29,7 +29,6 @@ export const EmojiList = ({ items }: EmojiListProps) => {
               )}
             </CopyButton>
           }
-          tt="capitalize"
         >
           {item.emojiName}
         </List.Item>
