@@ -9,9 +9,7 @@ from pydantic.dataclasses import dataclass
 __all__ = ["Emoji", "EmojiKeyword", "EmojiShortcode", "F32Array", "SqliteDsn"]
 
 
-EmojiShortcode = NewType(
-    "EmojiShortcode", constr(pattern=r"^:[\-a-z\d]+:$", max_length=127)
-)
+EmojiShortcode = NewType("EmojiShortcode", constr(max_length=127))
 
 EmojiKeyword = NewType("EmojiKeyword", constr(max_length=31))
 

@@ -1,14 +1,14 @@
 from pydantic import UUID4, BaseModel, Field
 
 from app.api.model import ListModel
-from app.domain.value_object import EmojiShortcode
 
 __all__ = ["EmojiModel", "FeedbackModel", "SearchResultModel"]
 
 
 class EmojiModel(BaseModel):
     emoji: str
-    shortcode: EmojiShortcode
+    name: str
+    shortcode: str
 
 
 class SearchResultModel(ListModel[EmojiModel]):
