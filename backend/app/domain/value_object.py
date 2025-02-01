@@ -11,7 +11,7 @@ __all__ = ["Emoji", "EmojiKeyword", "EmojiShortcode", "F32Array", "SqliteDsn"]
 
 EmojiShortcode = NewType("EmojiShortcode", constr(max_length=127))
 
-EmojiKeyword = NewType("EmojiKeyword", constr(max_length=31))
+EmojiKeyword = NewType("EmojiKeyword", constr(max_length=127))
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

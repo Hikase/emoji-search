@@ -163,8 +163,6 @@ class FeatureExtractor:
         if isinstance(docs, str):
             docs = [docs]
 
-        docs = [f"query: {doc}" for doc in docs]
-
         encodings = cast(Sequence[Encoding], self._tokenizer.encode_batch(docs))  # pyright: ignore [reportUnknownMemberType]
 
         input_ids: npt.NDArray[np.int64] = np.array(

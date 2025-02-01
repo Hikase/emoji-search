@@ -28,7 +28,7 @@ async def uc_search(
 
     with stopwatch() as search_time:
         search_result = await search_gateway.semantic_search(
-            feature_extractor.embed(query)[0]
+            feature_extractor.embed(f"query: {query}")[0]
         )
 
     async with connection.begin():
